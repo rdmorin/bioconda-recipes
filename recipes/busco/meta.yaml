@@ -1,37 +1,67 @@
+{% set version = "4.1.4" %}
+{% set sha256 = "9a71a1b56aaaaa46906a7473ff9398f10e5a59227d4b5b70712de350d7318736" %}
+
 package:
   name: busco
-  version: "2.0"
+  version: {{ version }}
 
 build:
-  # Not available for osx because requires augustus
-  skip: True # [osx]
   number: 0
+  noarch: python
 
 source:
-  fn: busco-v2.0.tar.gz
-  url: https://gitlab.com/ezlab/busco/repository/archive.tar.gz?ref=623f5a65
-  md5: eaf3af75825987de39bf1e4570137127
+  url: https://gitlab.com/ezlab/busco/-/archive/{{ version }}/busco-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+  patches:
+    - 0001-Add-default-config-path-within-prefix.patch
 
 requirements:
-  build:
-    - python
+  host:
+    - python >=3.3
+    - pip
+    - wget
+    - blast >=2.10.1 # There is a multithreading problem for all BLAST versions between 2.4 and 2.10.0
+    - hmmer >=3.1b2 # sepp needs this version
+    - augustus >=3.3
+    - biopython
+    - prodigal
+    - sepp >=4.3.10
   run:
-    - python
-    - blast
-    - hmmer
-    - augustus
+    - python >=3.3
+    - wget
+    - blast >=2.10.1 # There is a multithreading problem for all BLAST versions between 2.4 and 2.10.0
+    - hmmer >=3.1b2 # sepp needs this version
+    - augustus >=3.3
+    - biopython
+    - r-base
+    - r-ggplot2 >=2.2.1
+    - prodigal
+    - sepp >=4.3.10
+
+test:
+  commands:
+    - busco -h
+    - generate_plot.py -h
+    - python -c 'import busco.ConfigManager as cm; print(cm.BuscoConfigManager({}).get_config_file())'
+  source_files:
+    # used in run_test.sh
+    - test_data
 
 about:
   home: http://busco.ezlab.org/
-  license: GPL
+  license: MIT
+  license_file: LICENSE
   summary: BUSCO provides measures for quantitative assessment of genome
            assembly, gene set, and transcriptome completeness based on
            evolutionarily informed expectations of gene content from
            near-universal single-copy orthologs selected from OrthoDB.
 
-test:
-  commands:
-    - BUSCO.py -h > /dev/null
-    - BUSCO_plot.py -h > /dev/null
-    - busco -h > /dev/null
-    - busco_plot -h > /dev/null
+extra:
+  identifiers:
+    - biotools:busco
+    - doi:10.1093/bioinformatics/btv351
+    - usegalaxy-eu:busco
+  recipe-maintainers:
+    - silask
+    - matsepp
+    - berkelem

@@ -1,35 +1,49 @@
-{% set WIGGLETOOLS_VERSION = "1.2.1" %}
-{% set WIGGLETOOLS_SHA256 = "906d32e281fe234b3eacbe569c21e68d61aca3d0ef2eec501e4efd61799be4ee" %}
+{% set name = "WiggleTools" %}
+{% set version = "1.2.8" %}
+{% set sha256 = "0c2119480208ae09ea3eba249c1a3a69bcccbdb97dcd1fb2e55f3deee0404b73" %}
 
 package:
-  name: wiggletools
-  version: {{ WIGGLETOOLS_VERSION }}
+  name: {{ name|lower }}
+  version: {{ version }}
 
 build:
   number: 0
 
 source:
-  fn: wiggletools-{{ WIGGLETOOLS_VERSION }}.tar.gz
-  url: https://github.com/Ensembl/WiggleTools/archive/v{{ WIGGLETOOLS_VERSION }}.tar.gz
-  sha256: {{ WIGGLETOOLS_SHA256 }}
+  url: https://github.com/Ensembl/WiggleTools/archive/v{{ version }}.tar.gz
+  sha256: {{ sha256 }}
 
 requirements:
   build:
+    - {{ compiler('c') }}
+  host:
     - libbigwig
     - htslib
     - gsl
+    - libcblas
+    - zlib
+    - bzip2
+    - libcurl
+    - libdeflate
   run:
     - libbigwig
     - htslib
     - gsl
-    #
+    - libcblas
+    - zlib
+    - bzip2
+    - libcurl
+    - libdeflate  
+
+test:
+  commands:
+    - wiggletools --help
 
 about:
   home: https://github.com/Ensembl/WiggleTools
   license: Apache
+  license_family: Apache
+  license_file: LICENSE
   summary: The WiggleTools package allows genomewide data files to be manipulated as numerical functions,
            equipped with all the standard functional analysis operators (sum, product, product by a scalar, comparators),
            and derived statistics (mean, median, variance, stddev, t-test, Wilcoxon's rank sum test, etc).
-test:
-  commands:
-    - wiggletools --help

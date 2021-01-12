@@ -1,45 +1,61 @@
-{% set name = "unicycler" %}
-{% set version = "0.3.0b" %}
+{% set version = "0.4.8" %}
+{% set sha256 = "e948871e4de9db5964c9ca6f8f877c3cbe6a46f62052dfab52ffe0f45bbbd203" %}
 
 package:
-  name: {{ name|lower }}
+  name: unicycler
   version: {{ version }}
 
-build:
-  number: 0
-  skip: True # [py27]
-
 source:
-  fn: {{ name|lower }}_{{ version }}.tar.gz
-  url: https://github.com/rrwick/Unicycler/archive/906a3e7f314c7843bf0b4edf917593fc10baee4f.tar.gz
-  md5: 5f06d2bd8ef5065c8047421db8c7895f
+  - url: https://github.com/rrwick/Unicycler/archive/v{{ version }}.tar.gz
+    sha256: {{ sha256 }}
+    patches:
+      - Makefile.patch
+      - misc.py.patch
+
+build:
+  number: 3
+  skip: True  # [py<34]
 
 requirements:
   build:
-  - python
-  - setuptools
-  - gcc 
-
+    - {{ compiler("c") }}
+    - {{ compiler("cxx") }}
+  host:
+    - python
+    - pip
+    - zlib
   run:
-  - python
-  - libgcc  
-  - spades >=3.6.2
-  - pilon
-  - java-jdk
-  - bowtie2
-  - samtools >=1.0
-  - blast 
-  - freebayes
+    - python
+    - spades >=3.6.2
+    - pilon
+    - openjdk
+    - bowtie2
+    - samtools >=1.0
+    - blast
+    - freebayes
+    - racon
+    - miniasm
 
 test:
   commands:
-    - unicycler -h 
-    - unicycler_align -h 
-    - unicycler_check -h
-    - unicycler_polish -h
+    - COLUMNS=80 unicycler -h
+    - COLUMNS=80 unicycler_align -h
+    - COLUMNS=80 unicycler_check -h
+    - COLUMNS=80 unicycler_polish -h
+    - samtools --help
+    # test that bowtie outputs its version
+    - bowtie2 --version | grep -q "bowtie2-align-s version [0-9]"
+    # test if https protocol works, if it doesnt samtools will fail with "Protocol not supported"
+    - samtools view 'https://example.com' 2>&1 | grep 'fail to read the header' -q
 
 about:
   home: https://github.com/rrwick/Unicycler
   license: GPL-3.0
+  license_family: GPL
   license_file: LICENSE
-  summary: 'Hybrid assembly pipeline for bacterial genomes'
+  summary: Hybrid assembly pipeline for bacterial genomes
+
+extra:
+  identifiers:
+    - biotools:unicycler
+    - usegalaxy-eu:unicycler
