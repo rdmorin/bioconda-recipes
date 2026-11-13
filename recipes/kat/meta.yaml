@@ -1,39 +1,64 @@
-about:
-  home: https://github.com/TGAC/KAT
-  license: GPL3
-  license_file: COPYING
-  summary: 'KAT is a suite of tools that analyse jellyfish hashes or sequence files (fasta or fastq) using kmer counts'
-
-build:
-  number: 1 
-  skip: True # [osx]
-  string: boost{{CONDA_BOOST}}_{{PKG_BUILDNUM}}
+{% set name = "kat" %}
+{% set version = "2.4.2" %}
+{% set sha256 = "d6116cefdb5ecd9ec40898dd92362afe1a76fa560abfe0f2cd29cbe0d95cb877" %}
 
 package:
-  name: kat
-  version: '2.3.1'
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/TGAC/KAT/archive/Release-{{ version }}.tar.gz
+  sha256: {{ sha256 }}
+  patches:
+    - 0001-install.patch
+    - 0002-libs.patch
+    - 0003-kat.patch
+
+build:
+  number: 5
+  skip: True  # [py > 39]
+  run_exports:
+    - {{ pin_subpackage('kat', max_pin="x") }}
 
 requirements:
   build:
-      - gcc
-      - libgcc
-      - autoconf
-      - automake
-      - libtool
-      - boost {{CONDA_BOOST}}*
-      - gnuplot
-      - jellyfish
-      - perl
+    - make
+    - {{ compiler('cxx') }}
+    - autoconf
+    - automake
+    - libtool
+    - pkg-config
+  host:
+    - python
+    - pip
+    - zlib
+    - numpy
+    - scipy
+    - matplotlib-base
+    - tabulate
+    - boost-cpp <1.84.0
   run:
-      - boost {{CONDA_BOOST}}*
-      - gnuplot
-      - jellyfish
-
-source:
-   fn: Release-2.3.1.tar.gz
-   url: https://github.com/TGAC/KAT/archive/Release-2.3.1.tar.gz
-   sha1: ddcfe13d29140c80950a53c7441a600e73a86630
+    - python
+    - numpy
+    - scipy
+    - matplotlib-base
+    - tabulate
+    - boost-cpp <1.84.0
 
 test:
   commands:
     - kat --version
+
+about:
+  home: "https://github.com/TGAC/KAT"
+  dev_url: "https://github.com/TGAC/KAT"
+  license: "GPL-3.0-or-later"
+  license_family: GPL3
+  license_file: COPYING
+  summary: "KAT is a suite of tools that analyse jellyfish hashes or sequence files (fasta or fastq) using kmer counts."
+  doc_url: "https://kat.readthedocs.io/en/latest"
+
+extra:
+  identifiers:
+    - biotools:kat
+    - doi:10.1093/bioinformatics/btw663

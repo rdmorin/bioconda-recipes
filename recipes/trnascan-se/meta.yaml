@@ -1,5 +1,6 @@
 {% set name = "tRNAscan-SE" %}
-{% set version = "1.23" %}
+{% set version = "2.0.13" %}
+{% set sha256 = "895a02a59257bdabbb62753b59ee46c9760e6ce4ca864f2b161b2602992d5168" %}
 
 package:
   name: {{ name|lower }}
@@ -7,41 +8,46 @@ package:
 
 build:
   number: 0
+  run_exports:
+    - {{ pin_subpackage(name|lower, max_pin="x") }}
 
 source:
-  fn: {{ name|lower }}_{{ version }}.tar.Z
-  url: http://eddylab.org/software/tRNAscan-SE/tRNAscan-SE-1.23.tar.Z
-  md5: 4e78c9d8af173107c4a30ce44e74f0cf
+  url: https://github.com/UCSC-LoweLab/tRNAscan-SE/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: {{ sha256 }}
   patches:
-    - patches/checkversion.pl.patch
-    - patches/fasta2gsi.pl.patch
-    - patches/instman.pl.patch
-    - patches/sstofa.pl.patch
-    - patches/sqio.c.patch 
-    - patches/tRNAscan-SE.src.patch
-    - patches/Makefile.patch
+    - patches/libdir.patch
 
 requirements:
   build:
-    - gcc  # [not osx]
-    - llvm  # [osx]
-    - zlib
+    - {{ compiler('c') }}
+    - {{ stdlib('c') }}
+    - make
+    - autoconf
+    - automake
+    - libtool
+  host:
     - perl
-    - perl-app-cpanminus
-    - perl-module-build
-
   run:
-    - libgcc  # [not osx]
-    - zlib
     - perl
+    - infernal >=1.1.4
 
 test:
   commands:
-    - tRNAscan-SE -h > /dev/null
+    - tRNAscan-SE -h
 
 about:
-  home: http://eddylab.org/software.html
-  summary: tRNA detection in large-scale genome sequence
-  licence: GPL
+  home: "https://lowelab.ucsc.edu/tRNAscan-SE/"
+  license: "GPL-3.0-or-later"
+  license_family: GPL3
+  license_file: LICENSE
+  summary: tRNA detection in large-scale genomic sequences
+  doc_url: "https://lowelab.ucsc.edu/tRNAscan-SE/help.html"
+  dev_url: "https://github.com/UCSC-LoweLab/tRNAscan-SE"
 
-
+extra:
+  identifiers:
+    - biotools:trnascan-se
+    - doi:10.1093/nar/gkab688
+  additional-platforms:
+    - linux-aarch64
+    - osx-arm64
